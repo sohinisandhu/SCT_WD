@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pretty Pink To-Do & Reminder App</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ff9ec4, #fcb3ff, #ffd6e8);
+      font-family: "Poppins", sans-serif;
+    }
+
+    .todo-container {
+      width: 95%;
+      max-width: 700px;
+      background: #fff0f6;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 25px rgba(255, 105, 180, 0.3);
+      animation: fadeIn 1s ease-in-out;
+      height: 90vh;
+      overflow-y: auto;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    h1 {
+      text-align: center;
+      color: #ff4b91;
+      margin-bottom: 20px;
+      text-shadow: 1px 1px 4px rgba(255, 105, 180, 0.4);
+    }
+
+    .section-title {
+      margin-top: 25px;
+      color: #ff2e77;
+      font-size: 20px;
+      text-align: center;
+      text-shadow: 0px 0px 6px rgba(255, 150, 200, 0.5);
+    }
+
+    .task-input, .reminder-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    input, .reminder-input input[type="datetime-local"] {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 12px;
+      outline: none;
+      font-size: 16px;
+      box-shadow: 0 3px 10px rgba(255, 182, 193, 0.4);
+    }
+
+    button {
+      background: #ff4b91;
+      border: none;
+      color: white;
+      padding: 12px 18px;
+      border-radius: 12px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    button:hover {
+      background: #ff2e77;
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.6);
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    li {
+      background: #ffe6f1;
+      margin-bottom: 12px;
+      padding: 12px 15px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 10px rgba(255, 105, 180, 0.2);
+      transition: transform 0.2s ease;
+    }
+
+    li:hover {
+      transform: translateX(5px);
+    }
+
+    li.completed {
+      text-decoration: line-through;
+      background: #ffd6e8;
+      opacity: 0.8;
+    }
+
+    .delete-btn {
+      background: #ff4b91;
+      border: none;
+      color: white;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .delete-btn:hover {
+      background: #ff2e77;
+    }
+
+    .reminder-card {
+      background: #ffe0f0;
+      padding: 12px 15px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 3px 10px rgba(255, 105, 180, 0.2);
+    }
+
+    .highlight {
+      animation: glow 1s infinite alternate;
+    }
+
+    @keyframes glow {
+      from { box-shadow: 0 0 5px #ff4b91; }
+      to { box-shadow: 0 0 20px #ff2e77; }
+    }
+  </style>
+</head>
+<body>
+  <div class="todo-container">
+    <h1>🌸 My Pretty To-Do & Reminder App 🌸</h1>
+
+    <!-- Task Section -->
+    <h2 class="section-title">✅ To-Do List</h2>
+    <div class="task-input">
+      <input type="text" id="taskInput" placeholder="Enter a new task...">
+      <button onclick="addTask()">Add</button>
+    </div>
+    <ul id="taskList"></ul>
+
+    <!-- Reminder Section -->
+    <h2 class="section-title">⏰ Reminders</h2>
+    <div class="reminder-input">
+      <input type="text" id="reminderText" placeholder="Reminder text...">
+      <input type="datetime-local" id="reminderTime">
+      <button onclick="addReminder()">Set</button>
+    </div>
+    <div id="reminderList"></div>
+  </div>
+
+  <script>
+    const taskList = document.getElementById("taskList");
+    const taskInput = document.getElementById("taskInput");
+    const reminderList = document.getElementById("reminderList");
+
+    // Default tasks
+    const defaultTasks = ["Drink Water 💧", "Exercise 🏋️", "Study 📚"];
+    defaultTasks.forEach(task => addTask(task));
+
+    function addTask(taskText = null) {
+      const taskValue = taskText || taskInput.value.trim();
+      if (taskValue === "") return;
+
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <span onclick="toggleTask(this)">${taskValue}</span>
+        <button class="delete-btn" onclick="deleteTask(this)">X</button>
+      `;
+      taskList.appendChild(li);
+      if (!taskText) taskInput.value = "";
+    }
+
+    function toggleTask(el) {
+      el.parentElement.classList.toggle("completed");
+    }
+
+    function deleteTask(btn) {
+      btn.parentElement.remove();
+    }
+
+    function addReminder() {
+      const text = document.getElementById("reminderText").value.trim();
+      const time = document.getElementById("reminderTime").value;
+      if (text === "" || time === "") return;
+
+      const reminderCard = document.createElement("div");
+      reminderCard.className = "reminder-card";
+      reminderCard.innerHTML = `
+        <span>${text} - ${new Date(time).toLocaleString()}</span>
+        <button class="delete-btn" onclick="this.parentElement.remove()">X</button>
+      `;
+      reminderList.appendChild(reminderCard);
+
+      // Check reminder time
+      const reminderTime = new Date(time).getTime();
+      const now = new Date().getTime();
+      const timeout = reminderTime - now;
+
+      if (timeout > 0) {
+        setTimeout(() => {
+          reminderCard.classList.add("highlight");
+          alert("⏰ Reminder: " + text);
+        }, timeout);
+      }
+
+      document.getElementById("reminderText").value = "";
+      document.getElementById("reminderTime").value = "";
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple Clean Calculator</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ece9e6, #ffffff);
+      font-family: "Segoe UI", sans-serif;
+    }
+
+    .calculator {
+      width: 300px;
+      background: #f8f9fa;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .display {
+      background: #222;
+      color: #0f0;
+      font-size: 2rem;
+      padding: 15px;
+      text-align: right;
+      border-radius: 15px 15px 0 0;
+      min-height: 55px;
+      word-wrap: break-word;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      padding: 12px;
+    }
+
+    button {
+      padding: 18px;
+      font-size: 1.1rem;
+      border: none;
+      border-radius: 10px;
+      background: #e9ecef;
+      color: #333;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    button:hover {
+      background: #d6d8db;
+    }
+
+    button.operator {
+      background: #ffb84d;
+      color: white;
+    }
+
+    button.operator:hover {
+      background: #ffa31a;
+    }
+
+    button.equal {
+      background: #4caf50;
+      color: white;
+      grid-column: span 2;
+    }
+
+    button.equal:hover {
+      background: #45a049;
+    }
+
+    button.clear {
+      background: #e74c3c;
+      color: white;
+    }
+
+    button.clear:hover {
+      background: #c0392b;
+    }
+
+    button.back {
+      background: #3498db;
+      color: white;
+    }
+
+    button.back:hover {
+      background: #2980b9;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button class="clear">C</button>
+      <button class="operator">/</button>
+      <button class="operator">*</button>
+      <button class="operator">-</button>
+
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="operator">+</button>
+
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>.</button>
+
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button class="equal">=</button>
+
+      <button style="grid-column: span 2;">0</button>
+      <button class="back">←</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const buttons = document.querySelectorAll("button");
+    let currentInput = "";
+
+    function updateDisplay(value) {
+      display.textContent = value || "0";
+    }
+
+    function calculate() {
+      try {
+        if (!currentInput) return;
+        if (/[^0-9+\-*/.]/.test(currentInput)) throw new Error("Invalid");
+        const result = Function('"use strict";return (' + currentInput + ")")();
+        if (!isFinite(result)) throw new Error("Error");
+        currentInput = result.toString();
+        updateDisplay(currentInput);
+      } catch {
+        updateDisplay("Error");
+        currentInput = "";
+      }
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => {
+        const val = btn.textContent;
+        if (val === "C") {
+          currentInput = "";
+          updateDisplay("");
+        } else if (val === "=") {
+          calculate();
+        } else if (val === "←") {
+          currentInput = currentInput.slice(0, -1);
+          updateDisplay(currentInput);
+        } else {
+          currentInput += val;
+          updateDisplay(currentInput);
+        }
+      });
+    });
+
+    document.addEventListener("keydown", e => {
+      if ((e.key >= "0" && e.key <= "9") || ["+", "-", "*", "/", "."].includes(e.key)) {
+        currentInput += e.key;
+        updateDisplay(currentInput);
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        calculate();
+      } else if (e.key === "Backspace") {
+        currentInput = currentInput.slice(0, -1);
+        updateDisplay(currentInput);
+      } else if (e.key === "Escape") {
+        currentInput = "";
+        updateDisplay("");
+      }
+    });
+  </script>
+</body>
+</html>

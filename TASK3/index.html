@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe Game</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: #0f2027;
+      background: linear-gradient(135deg, #2c5364, #203a43, #0f2027);
+      font-family: Arial, sans-serif;
+      color: #fff;
+    }
+    .game-box {
+      text-align: center;
+    }
+    h2 {
+      margin-bottom: 10px;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(3, 90px);
+      grid-template-rows: repeat(3, 90px);
+      gap: 6px;
+      margin: 20px auto;
+    }
+    .tile {
+      width: 90px;
+      height: 90px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 10px;
+      font-size: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+    .tile:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    .info {
+      font-size: 1.1rem;
+      margin: 15px 0;
+    }
+    .controls button {
+      margin: 5px;
+      padding: 7px 16px;
+      border: none;
+      border-radius: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.25s;
+    }
+    .reset-btn { background: crimson; color: white; }
+    .mode-btn { background: seagreen; color: white; }
+    .controls button:hover {
+      transform: scale(1.08);
+    }
+
+    /* Winner animation */
+    .winner {
+      background: gold !important;
+      color: black;
+      animation: glowBounce 1s ease-in-out infinite alternate;
+    }
+    @keyframes glowBounce {
+      0% { transform: scale(1); box-shadow: 0 0 5px gold; }
+      100% { transform: scale(1.2); box-shadow: 0 0 20px yellow; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game-box">
+    <h2>⭕❌ Tic Tac Toe ❌⭕</h2>
+    <div class="info" id="turnMsg">Turn: X</div>
+    <div id="grid"></div>
+    <div class="controls">
+      <button class="reset-btn" onclick="restart()">Restart</button>
+      <button class="mode-btn" onclick="switchMode()">Switch Mode</button>
+    </div>
+    <p id="modeLine">Current: Player vs Player</p>
+  </div>
+
+  <script>
+    const grid = document.getElementById("grid");
+    const msg = document.getElementById("turnMsg");
+    const modeLine = document.getElementById("modeLine");
+
+    let squares = Array(9).fill("");
+    let active = "X";
+    let running = true;
+    let compMode = false;
+
+    const wins = [
+      [0,1,2],[3,4,5],[6,7,8],
+      [0,3,6],[1,4,7],[2,5,8],
+      [0,4,8],[2,4,6]
+    ];
+
+    function buildBoard() {
+      grid.innerHTML = "";
+      for (let i = 0; i < 9; i++) {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.dataset.id = i;
+        tile.onclick = () => tap(i, tile);
+        grid.appendChild(tile);
+      }
+    }
+
+    function tap(i, tile) {
+      if (!running || squares[i] !== "") return;
+
+      squares[i] = active;
+      tile.textContent = active;
+
+      let winCombo = check(active);
+      if (winCombo) {
+        msg.textContent = `Winner: ${active}`;
+        running = false;
+        highlight(winCombo);
+        return;
+      }
+      if (!squares.includes("")) {
+        msg.textContent = "Draw!";
+        running = false;
+        return;
+      }
+
+      active = active === "X" ? "O" : "X";
+      msg.textContent = `Turn: ${active}`;
+
+      if (compMode && active === "O") {
+        setTimeout(autoPlay, 500);
+      }
+    }
+
+    function autoPlay() {
+      let free = squares.map((v,i)=> v===""?i:null).filter(v=>v!==null);
+      if (free.length === 0) return;
+      let pick = free[Math.floor(Math.random()*free.length)];
+      const tile = document.querySelector(`[data-id='${pick}']`);
+      tap(pick, tile);
+    }
+
+    function check(player) {
+      for (let combo of wins) {
+        if (combo.every(i => squares[i] === player)) {
+          return combo;
+        }
+      }
+      return null;
+    }
+
+    function highlight(combo) {
+      combo.forEach(i => {
+        document.querySelector(`[data-id='${i}']`).classList.add("winner");
+      });
+    }
+
+    function restart() {
+      squares = Array(9).fill("");
+      active = "X";
+      running = true;
+      msg.textContent = "Turn: X";
+      buildBoard();
+    }
+
+    function switchMode() {
+      compMode = !compMode;
+      modeLine.textContent = compMode ? "Current: Player vs Computer" : "Current: Player vs Player";
+      restart();
+    }
+
+    buildBoard();
+  </script>
+</body>
+</html>
